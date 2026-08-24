@@ -245,6 +245,9 @@ const novelAIModels: Record<string, { name: string; cmd: string }> = {
   '5BB76870': { name: 'NAI-V4.5-Curated (局部重绘)', cmd: 'nai4-5c' },
   '4BDE2A90': { name: 'NAI-V4.5-Full (NovelAI Diffusion 4.5)', cmd: 'nai4-5' },
   '1229B44F': { name: 'NAI-V4.5-Full (局部重绘)', cmd: 'nai4-5' },
+  '0ADF9AB7': { name: 'NAI-V5-Full (NovelAI Diffusion V5)', cmd: 'nai5' },
+  '657484A5': { name: 'NAI-V5-Full (局部重绘)', cmd: 'nai5' },
+  'DB276663': { name: 'NAI-V5-Curated (NovelAI Diffusion V5)', cmd: 'nai5c' },
 }
 
 // 识别 NovelAI 模型
@@ -360,22 +363,29 @@ export function generateHhsHuatuCommand(
 }
 
 // 坐标转换为位置标识
+// 命中 5×5 网格点时输出 A1-E5（V4/V4.5 及 V5 兼容写法）；
+// 其余连续坐标输出 x,y（NAI 5 自由定位，与 hhs-huatu 一致）
 export function coordsToPosition(x: number, y: number): string {
-  // X 轴映射：0.1=A, 0.3=B, 0.5=C, 0.7=D, 0.9=E
-  const xMap: Record<string, string> = {
-    '0.1': 'A', '0.3': 'B', '0.5': 'C', '0.7': 'D', '0.9': 'E',
+  const xMap: Record<number, string> = {
+    0.1: 'A', 0.3: 'B', 0.5: 'C', 0.7: 'D', 0.9: 'E',
   }
-  // Y 轴映射：0.1=1, 0.3=2, 0.5=3, 0.7=4, 0.9=5
-  const yMap: Record<string, string> = {
-    '0.1': '1', '0.3': '2', '0.5': '3', '0.7': '4', '0.9': '5',
+  const yMap: Record<number, string> = {
+    0.1: '1', 0.3: '2', 0.5: '3', 0.7: '4', 0.9: '5',
   }
 
-  const xKey = x.toFixed(1)
-  const yKey = y.toFixed(1)
-  const xPos = xMap[xKey] || `x${x}`
-  const yPos = yMap[yKey] || `y${y}`
+  const matchGrid = (value: number, map: Record<number, string>): string | null => {
+    for (const key of Object.keys(map).map(Number)) {
+      if (Math.abs(value - key) < 1e-4) return map[key]
+    }
+    return null
+  }
 
-  return `${xPos}${yPos}`
+  const xPos = matchGrid(x, xMap)
+  const yPos = matchGrid(y, yMap)
+  if (xPos && yPos) return `${xPos}${yPos}`
+
+  const clamp = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 1000) / 1000
+  return `${clamp(x)},${clamp(y)}`
 }
 
 // 解析 V4 角色提示词

@@ -16,7 +16,7 @@ export const usage = `
 基于stable-diffusion-inspector项目[GitHub 仓库](https://github.com/Akegarasu/stable-diffusion-inspector)开发。
 从 Stable Diffusion 生成的图片中读取 pnginfo 来获取生成的参数 / Stable Diffusion 模型类别解析。
 ### ✨ 核心亮点
-适配[hhs-huatu](https://github.com/hhs2275/koishi-plugin-hhs-huatu)插件角色提示词表达格式。
+适配[hhs-huatu](https://github.com/hhs2275/koishi-plugin-hhs-huatu)插件角色提示词表达格式，支持识别 NAI-V3 / V4 / V4.5 / V5（含 V5 Full 局部重绘）。
 `
 
 export const Config: Schema<Config> = Schema.object({

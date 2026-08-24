@@ -8,7 +8,7 @@
 
 -  解析 PNG 图片中的 Stable Diffusion 生成参数
 -  自动提取正向提示词、负向提示词和生成参数
--  **识别 NovelAI 模型**（NAI-V3, NAI-V4, NAI-V4.5 等）
+-  **识别 NovelAI 模型**（NAI-V3, NAI-V4, NAI-V4.5, NAI-V5 等）
 -  **识别生成类型**（文生图、图生图、氛围转移）
 -  **NovelAI V4+ 角色提示词支持**（Character Prompts，坐标位置显示）
 -  支持多种调用方式（命令触发或自动回复）
@@ -112,9 +112,10 @@ Steps: 23, Sampler: k_euler_ancestral, CFG scale: 5.0, Seed: 2691682226, Size: 8
 ```
 
 **角色提示词说明：**
-- `@B3` 表示角色位于 B3 位置（左偏中间）
+- `@B3` 表示角色位于 B3 位置（左偏中间，5×5 网格，V4/V4.5 及兼容写法）
+- `@0.25,0.7` 表示 NAI 5 自由坐标（值域 0~1，对应官方网页版拖拽定位）
 - `--uc:frown` 表示该角色的负面提示词
-- 坐标系统：X轴(A-E) × Y轴(1-5) = 25个网格位置
+- 坐标系统：网格为 X轴(A-E) × Y轴(1-5)；非网格点还原为 `x,y`
 - 详见 [V4_CHARACTER_PROMPTS.md](V4_CHARACTER_PROMPTS.md)
 
 ### SD WebUI 格式
