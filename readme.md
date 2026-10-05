@@ -133,6 +133,18 @@ lowres, bad anatomy, bad hands, text, error
 Steps: 28, Sampler: Euler a, CFG scale: 7, Seed: 1234567890, Size: 512x768
 ```
 
+## hhs-huatu 指令转化
+
+解析 NovelAI 图片时会附带一条可直接使用的 hhs-huatu 推测指令，其中：
+
+- **图片尺寸**（`-r`）：
+  - `832x1216` → `portrait`
+  - `1024x1024` → `square`
+  - `1216x832` → `landscape`
+  - 其余尺寸 → 输出原始尺寸，如 `-r 1024x1536`（hhs-huatu 会自动对齐到 64 的倍数）
+- **Variety+**（`-v`）：图片元数据中 `skip_cfg_above_sigma` 有值时输出裸 `-v` 开关，
+  具体的 sigma 数值由 hhs-huatu 按模型与分辨率自行计算。
+
 ## 技术实现
 
 插件使用以下 npm 包来解析 PNG 元数据：

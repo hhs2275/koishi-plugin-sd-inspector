@@ -11,7 +11,7 @@ export function formatSDInfoAsMessages(result: ParsedResult, chunks: PngChunk[])
     if (modelInfo) messages.push(`🤖 模型：${modelInfo}`)
     if (generationType) messages.push(`📝 类型：${generationType}`)
     if (prompt) messages.push(`🎨 正向提示词：\n${prompt}`)
-    if (characterPrompts) messages.push(`👥 角色提示词：\n"${characterPrompts}"`)
+    if (characterPrompts) messages.push(`👥 角色提示词：\n'${characterPrompts}'`)
     if (negativePrompt) messages.push(`🚫 负向提示词：\n${negativePrompt}`)
     if (params) messages.push(`⚙️ 生成参数：\n${params}`)
     if (isNovelAI && huatuCommand) messages.push(`💻 hhs-huatu 推测指令：\n${huatuCommand}`)
@@ -44,7 +44,7 @@ export function formatSDInfo(result: ParsedResult, chunks: PngChunk[]): string {
     if (modelInfo) output += ` 模型：${modelInfo}\n\n`
     if (generationType) output += ` 类型：${generationType}\n\n`
     if (prompt) output += ` 正向提示词：\n${prompt}\n\n`
-    if (characterPrompts) output += `👥 角色提示词：\n"${characterPrompts}"\n\n`
+    if (characterPrompts) output += `👥 角色提示词：\n'${characterPrompts}'\n\n`
     if (negativePrompt) output += `负向提示词：\n${negativePrompt}\n\n`
     if (params) output += ` 生成参数：\n${params}\n`
     if (isNovelAI && huatuCommand) output += `\n💻 hhs-huatu 推测指令：\n${huatuCommand}\n`

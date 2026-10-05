@@ -279,6 +279,16 @@ export function identifyGenerationType(jsonData: NovelAIMetadata): string {
   return types.join(' + ')
 }
 
+// 图片尺寸 → hhs-huatu `-r` 参数
+// 只有与 NovelAI 三种预设完全一致的尺寸才使用预设名，其余尺寸一律回退为显式 WxH
+// （hhs-huatu 的 -r 支持 `1024x1536` 这类自定义尺寸，并会自动对齐到 64 的倍数）
+export function resolutionToOption(width: number, height: number): string {
+  if (width === 832 && height === 1216) return 'portrait'
+  if (width === 1024 && height === 1024) return 'square'
+  if (width === 1216 && height === 832) return 'landscape'
+  return `${width}x${height}`
+}
+
 // 生成 hhs-huatu 绘图指令
 export function generateHhsHuatuCommand(
   jsonData: NovelAIMetadata,
@@ -299,10 +309,7 @@ export function generateHhsHuatuCommand(
   if (jsonData.steps) opts.push(`-t ${jsonData.steps}`)
 
   if (jsonData.width && jsonData.height) {
-    let res = 'square'
-    if (jsonData.width < jsonData.height) res = 'portrait'
-    else if (jsonData.width > jsonData.height) res = 'landscape'
-    opts.push(`-r ${res}`)
+    opts.push(`-r ${resolutionToOption(jsonData.width, jsonData.height)}`)
   }
 
   if (jsonData.scale !== undefined) opts.push(`-c ${jsonData.scale}`)
@@ -319,8 +326,10 @@ export function generateHhsHuatuCommand(
   if (jsonData.cfg_rescale !== undefined) opts.push(`-R ${jsonData.cfg_rescale}`)
   if (jsonData.strength !== undefined) opts.push(`-N ${jsonData.strength}`)
   if (jsonData.noise !== undefined) opts.push(`-n ${jsonData.noise}`)
-  if (jsonData.skip_cfg_above_sigma !== undefined && jsonData.skip_cfg_above_sigma !== null && jsonData.skip_cfg_above_sigma !== 'null') {
-    opts.push(`-v ${jsonData.skip_cfg_above_sigma}`)
+  // Variety+ 为纯开关：图片带 skip_cfg_above_sigma 即说明原作者开启了 Variety+，
+  // 这里只需输出裸 `-v`，具体 sigma 由 hhs-huatu 按模型与分辨率自行计算。
+  if (jsonData.skip_cfg_above_sigma !== undefined && jsonData.skip_cfg_above_sigma !== null && jsonData.skip_cfg_above_sigma !== 'null' && jsonData.skip_cfg_above_sigma !== '') {
+    opts.push('-v')
   }
 
   const requestType = jsonData.request_type || ''
@@ -347,16 +356,16 @@ export function generateHhsHuatuCommand(
       preciseRefs.push(`${mode},${strength},${fidelity}`)
     }
     if (preciseRefs.length > 0) {
-      opts.push(`-p "${preciseRefs.join(';')}"`)
+      opts.push(`-p '${preciseRefs.join(';')}'`)
     }
   }
 
-  let commandStr = `${cmdBase} -O ${opts.join(' ')}\n\n"${prompt || ''}"`
+  let commandStr = `${cmdBase} -O ${opts.join(' ')}\n\n'${prompt || ''}'`
   if (characterPrompts) {
-    commandStr += `\n\n-K "${characterPrompts}"`
+    commandStr += `\n\n-K '${characterPrompts}'`
   }
   if (negativePrompt) {
-    commandStr += `\n\n-u "${negativePrompt}"`
+    commandStr += `\n\n-u '${negativePrompt}'`
   }
 
   return commandStr
@@ -498,7 +507,7 @@ export function parsePngInfo(imageBuffer: Buffer, log?: Logger): PngChunk[] | nu
 
 // 解析 WebUI 格式的参数
 export function parseWebUiFormat(text: string) {
-  // 移除可能存在的 "parameters" 前缀
+  // 移除可能存在的 'parameters' 前缀
   let cleanText = text
   if (text.trim().toLowerCase().startsWith('parameters')) {
     cleanText = text.replace(/^parameters/i, '').trim()
@@ -636,7 +645,7 @@ export function parseChunks(chunks: PngChunk[], exifData?: any, log?: Logger): P
     const chunkText = chunk.text || ''
 
     // 优先检查是否是 SD WebUI 格式（通过文本内容特征判断）
-    // WebUI 格式特征：包含 "Negative prompt:" 或同时包含换行和 "Steps:"
+    // WebUI 格式特征：包含 'Negative prompt:' 或同时包含换行和 'Steps:'
     if (chunkText.includes('Negative prompt:') || (chunkText.includes('\n') && chunkText.includes('Steps: '))) {
       const parsed = parseWebUiFormat(chunkText)
       prompt = parsed.prompt
